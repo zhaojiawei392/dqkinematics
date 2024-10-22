@@ -50,7 +50,16 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 
-add_subdirectory(dependencies/qpOASES)
+add_subdirectory(libs/qpOASES)
+add_subdirectory(libs/dqpose)
+include_directories(
+    ${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/libs/qpOASES/include
+    ${PROJECT_SOURCE_DIR}/libs/dqpose/include
+)
+link_libraries(
+    qpOASES
+)
 
 if(dqrobot_BUILD_EXAMPLES)
     set(EXAMPLE_NAMES
@@ -58,11 +67,6 @@ if(dqrobot_BUILD_EXAMPLES)
     )
     foreach(EXAMPLE ${EXAMPLE_NAMES})
         add_executable(${EXAMPLE} examples/${EXAMPLE}.cpp)
-        target_include_directories(${EXAMPLE} PRIVATE 
-                                    ${PROJECT_SOURCE_DIR}/include
-                                    ${PROJECT_SOURCE_DIR}/dependencies/qpOASES/include)
-        target_link_libraries(${EXAMPLE} PRIVATE 
-                                pOASES)
     endforeach()
 endif()
 
