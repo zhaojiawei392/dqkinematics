@@ -24,6 +24,9 @@
  ##    This project includes [qpOASES](https://github.com/coin-or/qpOASES.git), 
  ##    licensed under the GNU LESSER GENERAL PUBLIC LICENSE Version 2.1, February 1999
 
+ ##    This project includes [dqpose](https://github.com/zhaojiawei392/dqpose.git), 
+ ##    licensed under the GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
+
 cmake_minimum_required(VERSION 3.25)
 
 # Macro options

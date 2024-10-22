@@ -14,13 +14,13 @@
     You should have received a copy of the GNU General Public License
     along with dqrobot. If not, see <https://www.gnu.org/licenses/>.
 
-
-
     Filename README.md
     Author Jiawei ZHAO
 	Version 1.0
 	Date 2024-2025
 
-
     This project includes [qpOASES](https://github.com/coin-or/qpOASES.git), 
     licensed under the GNU LESSER GENERAL PUBLIC LICENSE Version 2.1, February 1999
+
+    This project includes [dqpose](https://github.com/zhaojiawei392/dqpose.git), 
+    licensed under the GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
