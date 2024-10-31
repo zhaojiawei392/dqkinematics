@@ -227,7 +227,8 @@ public:
     SerialManipulator() = delete;
     SerialManipulator(const std::array<std::array<jScalar, dof>, 5>& dhparams, const std::array<std::array<jScalar, dof>, 4>& limits, const std::array<jScalar, dof>& joint_positions)
     {
-        for (std::size_t i; i<dof; ++i){
+        // Initialize joints
+        for (int i=0; i<dof; ++i){
             if (dhparams.back()[i] == 0){
                 const std::array<jScalar, 4> dharray {dhparams[0][i], dhparams[1][i], dhparams[2][i], dhparams[3][i]};
                 _pjoints[i].reset( static_cast<Joint<jScalar, void>*>(new RevoluteJoint<jScalar, void>(dharray)) );
@@ -245,16 +246,23 @@ public:
 
         std::cout << "Constructed a " + std::to_string(joint_positions.size()) + "-DoF dqkinematics::SerialManipulator.\n" ;
     }
-
-    void set_base(const Pose<jScalar>& base) noexcept { _data.base = base; }
-    void set_effector(const Pose<jScalar>& effector) noexcept { _data.effector = effector; }
+    template<typename Scalar>
+    void set_base(const Pose<Scalar>& base) noexcept { _data.base = base; }
+    template<typename Scalar>
+    void set_effector(const Pose<Scalar>& effector) noexcept { _data.effector = effector; }
+    template<typename Scalar>
+    void set_config(const SerialManipulatorConfig<Scalar>& config) noexcept { _cfg = config; }
 
     void update(const Pose<jScalar>& desired_pose) {
         USING_NAMESPACE_QPOASES;
         const Rotation<jScalar>& r_end = _data.joint_poses.back().rotation();
+        std::cout << r_end << "\n";
         const Translation<jScalar>& t_end = _data.joint_poses.back().translation();
+        std::cout << t_end << "\n";
         const Rotation<jScalar>& rd = desired_pose.rotation();
+        std::cout << rd << "\n";
         const Translation<jScalar>& td = desired_pose.translation();
+        std::cout << td << "\n";
 
         std::array<Quat<jScalar>, dof> r_rd_derivatives;
         std::array<Quat<jScalar>, dof> t_derivatives;
@@ -345,22 +353,22 @@ public:
     inline std::array<jScalar, dof> joint_positions() const noexcept {return _data.joint_positions;}
     inline Pose<jScalar> end_pose() const noexcept {return _data.joint_poses.back();}
     inline std::size_t DoF() const noexcept {return dof;}
-    inline SerialManipulatorConfig<jScalar>& config() noexcept {return _cfg;}
-    inline SerialManipulatorData<jScalar, dof>& data() noexcept {return _data;}
+    inline const SerialManipulatorConfig<jScalar>& config() const noexcept {return _cfg;}
+    inline const SerialManipulatorData<jScalar, dof>& data() const noexcept {return _data;}
 
     virtual ~SerialManipulator() = default;
 
 private:
     void _update_kinematics() {
         _data.joint_poses.front() = _data.base * _pjoints.front()->fkm(_data.joint_positions.front());
-        for (std::size_t i=1; i<dof-1; ++i) {
+        for (int i=1; i<dof-1; ++i) {
             _data.joint_poses[i] = _data.joint_poses[i-1] * _pjoints[i]->fkm(_data.joint_positions[i]);
         }
         _data.joint_poses.back() = _pjoints.back()->fkm(_data.joint_positions.back()) * _data.effector;
 
         _data.joint_pose_derivatives.front() = _data.base * _pjoints.front()->derivative(_data.joint_positions.front()) 
                                                 * _data.joint_poses.front().conj() * _data.joint_poses.back();
-        for (size_t i=1; i<dof-1; ++i){
+        for (int i=1; i<dof-1; ++i){
             _data.joint_pose_derivatives[i] = _data.joint_poses[i-1] * _pjoints[i]->derivative(_data.joint_positions[i]) 
                                                 * _data.joint_poses[i].conj() * _data.joint_poses.back();
         }
