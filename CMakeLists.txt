@@ -30,8 +30,8 @@
 cmake_minimum_required(VERSION 3.25)
 
 # Not build lib examples
-set(QPOASES_BUILD_EXAMPLES OFF "Not build examples for qpoases.")
-set(dqpose_BUILD_EXAMPLES OFF "Not build examples for dqpose.")
+set(QPOASES_BUILD_EXAMPLES OFF CACHE INTERNAL "Not build examples for qpoases.")
+set(dqpose_BUILD_EXAMPLES OFF CACHE INTERNAL "Not build examples for dqpose.")
 
 # Macro options
 Option(dqrobot_BUILD_EXAMPLES ON "Build examples for dqrobot")
