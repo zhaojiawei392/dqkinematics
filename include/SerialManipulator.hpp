@@ -256,13 +256,9 @@ public:
     void update(const Pose<jScalar>& desired_pose) {
         USING_NAMESPACE_QPOASES;
         const Rotation<jScalar>& r_end = _data.joint_poses.back().rotation();
-        std::cout << r_end << "\n";
         const Translation<jScalar>& t_end = _data.joint_poses.back().translation();
-        std::cout << t_end << "\n";
         const Rotation<jScalar>& rd = desired_pose.rotation();
-        std::cout << rd << "\n";
         const Translation<jScalar>& td = desired_pose.translation();
-        std::cout << td << "\n";
 
         std::array<Quat<jScalar>, dof> r_rd_derivatives;
         std::array<Quat<jScalar>, dof> t_derivatives;
@@ -270,6 +266,8 @@ public:
             r_rd_derivatives[i] = _data.joint_pose_derivatives[i].real().conj() * rd;
             t_derivatives[i] = 2 * (_data.joint_pose_derivatives[i].dual() * _data.joint_poses[i].real().conj() 
                                     + _data.joint_poses[i].dual() * _data.joint_pose_derivatives[i].real().conj() );
+        std::cout << r_rd_derivatives[i] << "\n";
+        std::cout << t_derivatives[i] << "\n";
         }
 
         constexpr std::size_t dof2 = dof * dof;

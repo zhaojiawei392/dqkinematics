@@ -29,8 +29,12 @@
 
 cmake_minimum_required(VERSION 3.25)
 
+# Not build lib examples
+set(QPOASES_BUILD_EXAMPLES OFF "Not build examples for qpoases.")
+set(dqpose_BUILD_EXAMPLES OFF "Not build examples for dqpose.")
+
 # Macro options
-set(dqrobot_BUILD_EXAMPLES ON "Build examples for dqrobot")
+Option(dqrobot_BUILD_EXAMPLES ON "Build examples for dqrobot")
 message(STATUS "dqrobot_BUILD_EXAMPLES is set to ${dqrobot_BUILD_EXAMPLES}")
 
 # Set the project name and version
@@ -44,14 +48,16 @@ set(CMAKE_DEBUG_POSTFIX d)
 # the BUILD_INTERFACE genex
 set(gcc_like_cxx "$<COMPILE_LANG_AND_ID:CXX,ARMClang,AppleClang,Clang,GNU,LCC>")
 set(msvc_cxx "$<COMPILE_LANG_AND_ID:CXX,MSVC>")
+add_compile_options(
+  "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wall;-Wextra;-Wshadow;-Wformat=2;-Wunused>>"
+  "$<${msvc_cxx}:$<BUILD_INTERFACE:-W3>>"
+)
 
 # Make static, shared, executables all built in build dir
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 
-set(QPOASES_BUILD_EXAMPLES OFF CACHE BOOL "Not build examples for qpoases." FORCE)
-set(dqpose_BUILD_EXAMPLES OFF CACHE BOOL "Not build examples for dqpose." FORCE)
 add_subdirectory(libs/qpOASES)
 add_subdirectory(libs/dqpose)
 include_directories(
