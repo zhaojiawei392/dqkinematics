@@ -61,18 +61,6 @@ inline Quat<Scalar> __closest_invariant_rotation_error(const Rotation<Scalar>& r
     }
 }
 
-inline void __check_size_equality(const std::string& src_info, const std::string& des_info, std::size_t src_size, std::size_t des_size){
-    if (src_size != des_size){
-        throw std::range_error(src_info + " invalid size " + std::to_string(src_size) + ", should be equal to " + des_info + " " + std::to_string(des_size) + ".\n" );
-    }
-}
-
-inline void __check_size_inequality(const std::string& src_info, const std::string& des_info, std::size_t src_size, std::size_t des_size){
-    if (src_size == des_size){
-        throw std::range_error(src_info + " invalid size " + std::to_string(src_size) + ", should NOT be equal to " + des_info + " " + std::to_string(des_size) + ".\n" );
-    }
-}
-
 template<typename jScalar, typename>
 class Joint {
 public:
@@ -269,30 +257,37 @@ public:
         }
 
         constexpr std::size_t dof2 = dof * dof;
-        std::array<double, dof2> H;
+        // Initialize a zero array
+        std::array<double, dof2> H {};
         for (int i=0; i<dof; ++i) {
             for (int j=0; j<dof; ++j) {
                 const double Ht = t_derivatives[i].dot( t_derivatives[j] );
                 const double Hr = r_rd_derivatives[i].dot( r_rd_derivatives[j] );
-                H[i+j] = _cfg.translation_priority * Ht + (1-_cfg.translation_priority) * Hr;
+                H[i*dof+j] = _cfg.translation_priority * Ht + (1-_cfg.translation_priority) * Hr;
+                if (i==j)
+                    H[i*dof+j] += _cfg.joint_damping;
+                
             }
-            H[i] += _cfg.joint_damping;
         }
 
         const Quat<jScalar> t_err = t_end - td;
-
-        std::cout << t_end << "\n";
-        std::cout << td << "\n";
         const Quat<jScalar> r_rd_err = __closest_invariant_rotation_error(r_end, rd);
-        std::array<double, dof> g;
+        // Initialize a zero array
+        std::array<double, dof> g {};
         for (int i=0; i<dof; ++i) {
             const double ct = _cfg.error_gain * t_err.dot(t_derivatives[i]);
             const double cr = _cfg.error_gain * r_rd_err.dot(r_rd_derivatives[i]);
             g[i] = _cfg.translation_priority * ct + (1-_cfg.translation_priority) * cr;
         }
 
-        std::array<double, dof2> constraint;
-        constraint.fill(1);
+        // Initialize a zero array
+        std::array<double, dof2> constraints {};
+        for (int i=0; i<dof; ++i) {
+            for (int j=0; j<dof; ++j) {
+                if (i==j)
+                    constraints[i*dof+j] = 1;
+            }
+        }
 
         const std::array<jScalar, dof>& min_joint_positions = _data.joint_limits[0];
         const std::array<jScalar, dof>& max_joint_positions = _data.joint_limits[1];
@@ -311,7 +306,7 @@ public:
 
         const double* H_raw = H.data();
         const double* g_raw = g.data();
-        const double* A_raw = constraint.data();
+        const double* A_raw = constraints.data();
         const double* lb_A_raw = lower_constraint_bound.data();
         const double* ub_A_raw = upper_constraint_bound.data();
         const double* lb_raw = lower_bound.data();
@@ -343,7 +338,7 @@ public:
         qp.getPrimalSolution(xOpt);
         // update joint positions
         for (int i=0; i<dof; ++i) {
-            _data.joint_positions[i] += xOpt[i];
+            _data.joint_positions[i] += xOpt[i] * _cfg.sampling_time_sec;
         }
         _update_kinematics();
     }

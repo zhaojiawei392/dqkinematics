@@ -35,16 +35,16 @@ int main() {
     };
 
     std::array<std::array<float, 6>, 4> limits {
-        std::array<float, 6>{-150, -10, -10, -260, -90, -350},
-        std::array<float, 6>{150, 110, 150, 260, 100, 350},
-        std::array<float, 6>{-33, -32.1, -59.40, -60.50, -60.50, -90.80},
-        std::array<float, 6>{33, 32.1, 59.40, 60.50, 60.50, 90.80}
+        std::array<float, 6>{-175,     0,        0,       -175,    -120,    -175},
+        std::array<float, 6>{175,     175,      150,      175,     120,     175},
+        std::array<float, 6>{-20,     -20,      -40,      -40,     -40,     -60},
+        std::array<float, 6>{20,      20,       40,       40,      40,      60}
     };
     for (int i=0; i<6; ++i) {{
-        limits[0][i] = limits[0][i] / 180 * M_PI;
-        limits[1][i] = limits[0][i] / 180 * M_PI;
-        limits[2][i] = limits[0][i] / 180 * M_PI;
-        limits[3][i] = limits[0][i] / 180 * M_PI;
+        limits[0][i] = limits[0][i] / 180. * M_PI;
+        limits[1][i] = limits[1][i] / 180. * M_PI;
+        limits[2][i] = limits[2][i] / 180. * M_PI;
+        limits[3][i] = limits[3][i] / 180. * M_PI;
     }}
 
     std::array<float, 6> joint_positions {0,0,0,0,0,0};
@@ -60,13 +60,13 @@ int main() {
 
     while (true)
     {   
-        dqpose::Tranf offset = t_init + dqpose::Tranf(0, radius * cos(rad_speed*i), radius * sin(rad_speed*i));
+        dqpose::Tranf offset = t_init + dqpose::Tranf(-0.02, radius * cos(rad_speed*i), radius * sin(rad_speed*i) + 0.05);
         ++i;
         dqpose::Posef xd = dqpose::Posef::build_from(r_init, offset);
 
         robot.update(xd);
 
-        std::cout << robot.end_pose() << ">>" << xd << "\n";
+        // std::cout << robot.end_pose().rotation() << "\n" << xd.rotation() << "\n";
     }
 
 }             
