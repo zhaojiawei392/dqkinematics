@@ -30,7 +30,7 @@
 cmake_minimum_required(VERSION 3.25)
 
 # Macro options
-set(dqrobot_BUILD_EXAMPLES ON CACHE BOOL "Build examples for dqrobot" FORCE)
+set(dqrobot_BUILD_EXAMPLES ON "Build examples for dqrobot")
 message(STATUS "dqrobot_BUILD_EXAMPLES is set to ${dqrobot_BUILD_EXAMPLES}")
 
 # Set the project name and version
@@ -50,6 +50,8 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 
+set(QPOASES_BUILD_EXAMPLES OFF CACHE BOOL "Not build examples for qpoases." FORCE)
+set(dqpose_BUILD_EXAMPLES OFF CACHE BOOL "Not build examples for dqpose." FORCE)
 add_subdirectory(libs/qpOASES)
 add_subdirectory(libs/dqpose)
 include_directories(
