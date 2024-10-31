@@ -93,10 +93,6 @@ template<typename jScalar, typename>
 class RevoluteJoint : public Joint<jScalar> {
 protected:
     std::array<jScalar, 4> _dhparams; 
-    inline jScalar& theta() noexcept { return _dhparams[0];}
-    inline jScalar& d() noexcept { return _dhparams[1];}
-    inline jScalar& a() noexcept { return _dhparams[2];}
-    inline jScalar& alpha() noexcept { return _dhparams[3];}
 public:
     explicit RevoluteJoint(const std::array<jScalar, 4>& DH_parameters) noexcept
         : _dhparams(DH_parameters) {}
@@ -151,10 +147,6 @@ template<typename jScalar, typename>
 class PrismaticJoint : public Joint<jScalar> {
 protected:
     std::array<jScalar, 4> _dhparams; 
-    inline jScalar& theta() noexcept { return _dhparams[0];}
-    inline jScalar& d() noexcept { return _dhparams[1];}
-    inline jScalar& a() noexcept { return _dhparams[2];}
-    inline jScalar& alpha() noexcept { return _dhparams[3];}
 public:
     explicit PrismaticJoint(const std::array<jScalar, 4>& DH_parameters) noexcept
         : _dhparams(DH_parameters) {}
