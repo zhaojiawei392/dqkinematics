@@ -60,9 +60,9 @@ int main() {
 
     while (true)
     {   
-        dqpose::Tranf offset = t_init + dqpose::Tranf(-0.02, radius * cos(rad_speed*i), radius * sin(rad_speed*i) + 0.05);
+        dqpose::Tranf offset = t_init + dqpose::Tranf(0, radius * cos(rad_speed*i), radius * sin(rad_speed*i));
         ++i;
-        dqpose::Posef xd = dqpose::Posef(r_init, offset);
+        dqpose::Posef xd = dqpose::Posef::build_from(r_init, offset);
 
         robot.update(xd);
 

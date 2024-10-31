@@ -201,7 +201,7 @@ public:
 
 template<typename jScalar>
 struct SerialManipulatorConfig {
-    jScalar translation_priority{1};
+    jScalar translation_priority{0.9999};
     jScalar error_gain{50};
     jScalar sampling_time_sec{0.0004};
     jScalar joint_damping{0.0001};
@@ -247,11 +247,11 @@ public:
         std::cout << "Constructed a " + std::to_string(joint_positions.size()) + "-DoF dqkinematics::SerialManipulator.\n" ;
     }
     template<typename Scalar>
-    void set_base(const Pose<Scalar>& base) noexcept { _data.base = base; }
+    inline void set_base(const Pose<Scalar>& base) noexcept { _data.base = base; }
     template<typename Scalar>
-    void set_effector(const Pose<Scalar>& effector) noexcept { _data.effector = effector; }
+    inline void set_effector(const Pose<Scalar>& effector) noexcept { _data.effector = effector; }
     template<typename Scalar>
-    void set_config(const SerialManipulatorConfig<Scalar>& config) noexcept { _cfg = config; }
+    inline void set_config(const SerialManipulatorConfig<Scalar>& config) noexcept { _cfg = config; }
 
     void update(const Pose<jScalar>& desired_pose) {
         USING_NAMESPACE_QPOASES;
@@ -264,10 +264,8 @@ public:
         std::array<Quat<jScalar>, dof> t_derivatives;
         for (int i=0; i<dof; ++i) {
             r_rd_derivatives[i] = _data.joint_pose_derivatives[i].real().conj() * rd;
-            t_derivatives[i] = 2 * (_data.joint_pose_derivatives[i].dual() * _data.joint_poses[i].real().conj() 
-                                    + _data.joint_poses[i].dual() * _data.joint_pose_derivatives[i].real().conj() );
-        std::cout << r_rd_derivatives[i] << "\n";
-        std::cout << t_derivatives[i] << "\n";
+            t_derivatives[i] = 2 * (_data.joint_pose_derivatives[i].dual() * _data.joint_poses.back().real().conj() 
+                                    + _data.joint_poses.back().dual() * _data.joint_pose_derivatives[i].real().conj() );
         }
 
         constexpr std::size_t dof2 = dof * dof;
@@ -276,12 +274,15 @@ public:
             for (int j=0; j<dof; ++j) {
                 const double Ht = t_derivatives[i].dot( t_derivatives[j] );
                 const double Hr = r_rd_derivatives[i].dot( r_rd_derivatives[j] );
-                const double Hj = _cfg.joint_damping;
-                H[i+j] = _cfg.translation_priority * Ht + (1-_cfg.translation_priority) * Hr + Hj;
+                H[i+j] = _cfg.translation_priority * Ht + (1-_cfg.translation_priority) * Hr;
             }
+            H[i] += _cfg.joint_damping;
         }
 
         const Quat<jScalar> t_err = t_end - td;
+
+        std::cout << t_end << "\n";
+        std::cout << td << "\n";
         const Quat<jScalar> r_rd_err = __closest_invariant_rotation_error(r_end, rd);
         std::array<double, dof> g;
         for (int i=0; i<dof; ++i) {
@@ -362,7 +363,7 @@ private:
         for (int i=1; i<dof-1; ++i) {
             _data.joint_poses[i] = _data.joint_poses[i-1] * _pjoints[i]->fkm(_data.joint_positions[i]);
         }
-        _data.joint_poses.back() = _pjoints.back()->fkm(_data.joint_positions.back()) * _data.effector;
+        _data.joint_poses.back() = _data.joint_poses[dof-2] * _pjoints.back()->fkm(_data.joint_positions.back()) * _data.effector;
 
         _data.joint_pose_derivatives.front() = _data.base * _pjoints.front()->derivative(_data.joint_positions.front()) 
                                                 * _data.joint_poses.front().conj() * _data.joint_poses.back();
